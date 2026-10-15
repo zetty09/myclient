@@ -1,43 +1,52 @@
 package com.myclient;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.myclient.cosmetics.WingType;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Config {
-    public static String wings = "NONE";
-    public static boolean island = true;
-    public static boolean music = false;
-
-    private static class Data {
-        String wings = "NONE";
-        boolean island = true;
-        boolean music = false;
+    public static class ModState {
+        public boolean enabled;
+        public int key = -1;
     }
 
+    public static class Data {
+        public String wings = "NONE";
+        /** Tekst w Dynamic Island. Puste = nick z konta. */
+        public String islandName = "jape3kk_dev";
+        public Map<String, ModState> modules = new HashMap<>();
+    }
+
+    public static Data data = new Data();
+
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("myclient.json");
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static WingType wing() {
-        try { return WingType.valueOf(wings); } catch (Exception e) { return WingType.NONE; }
+        try { return WingType.valueOf(data.wings); } catch (Exception e) { return WingType.NONE; }
     }
 
     public static void load() {
         try {
             if (!Files.exists(FILE)) return;
             Data d = GSON.fromJson(Files.readString(FILE), Data.class);
-            wings = d.wings; island = d.island; music = d.music;
+            if (d == null) return;
+            if (d.wings == null) d.wings = "NONE";
+            if (d.islandName == null) d.islandName = "jape3kk_dev";
+            if (d.modules == null) d.modules = new HashMap<>();
+            data = d;
         } catch (Exception ignored) {}
     }
 
     public static void save() {
         try {
-            Data d = new Data();
-            d.wings = wings; d.island = island; d.music = music;
-            Files.writeString(FILE, GSON.toJson(d));
+            Files.writeString(FILE, GSON.toJson(data));
         } catch (Exception ignored) {}
     }
 }

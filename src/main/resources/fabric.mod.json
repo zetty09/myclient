@@ -2,14 +2,17 @@
   "schemaVersion": 1,
   "id": "myclient",
   "version": "${version}",
-  "name": "MyClient",
-  "description": "GUI z kosmetykami (skrzydla) i wizualami po prawym kliknieciu w czacie.",
+  "name": "Aether",
+  "description": "Aether client: cosmetics, modules, Dynamic Island and visuals.",
   "authors": ["you"],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
     "client": ["com.myclient.MyClientMod"]
   },
+  "mixins": [
+    { "config": "myclient.mixins.json", "environment": "client" }
+  ],
   "depends": {
     "fabricloader": ">=0.16.9",
     "minecraft": "~1.21.4",
