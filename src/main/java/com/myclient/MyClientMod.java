@@ -1,6 +1,7 @@
 package com.myclient;
 
 import com.myclient.cosmetics.WingsFeatureRenderer;
+import com.myclient.modules.ModuleManager;
 import com.myclient.ui.ChatMenu;
 import com.myclient.ui.MainMenuScreen;
 import com.myclient.visuals.DynamicIsland;
@@ -11,6 +12,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.util.InputUtil;
@@ -22,6 +24,7 @@ public class MyClientMod implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         Config.load();
+        ModuleManager.init();
 
         MENU_KEY = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.myclient.menu", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "category.myclient"));
@@ -33,23 +36,24 @@ public class MyClientMod implements ClientModInitializer {
             }
         });
 
-        // menu na klawisz
+        // menu na klawisz + logika modulow i bindy
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (MENU_KEY.wasPressed()) {
                 if (client.currentScreen == null) client.setScreen(new MainMenuScreen());
             }
+            ModuleManager.tick(client);
             MusicPlayer.tick(client);
         });
 
         // wizualy na HUD
         HudRenderCallback.EVENT.register((ctx, tickCounter) -> {
-            var c = net.minecraft.client.MinecraftClient.getInstance();
+            MinecraftClient c = MinecraftClient.getInstance();
             if (c.options.hudHidden) return;
-            if (Config.island) DynamicIsland.render(ctx, c);
-            if (Config.music) MusicPlayer.render(ctx, c);
+            if (ModuleManager.ISLAND.enabled) DynamicIsland.render(ctx, c);
+            if (ModuleManager.MUSIC.enabled) MusicPlayer.render(ctx, c);
         });
 
-        // prawy klik w czacie -> lista wizuali
+        // prawy klik w czacie -> lista modulow
         ChatMenu.register();
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
