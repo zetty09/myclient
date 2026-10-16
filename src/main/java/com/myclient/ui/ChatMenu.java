@@ -10,9 +10,11 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 
-/** Lista modulow wyskakujaca po prawym kliknieciu w czacie. */
+import java.util.List;
+
+/** Lista visuali wyskakujaca po prawym kliknieciu w czacie (+ skrot do edytora HUD). */
 public class ChatMenu {
-    private static final int ROW = 18, WIDTH = 126, HEADER = 16;
+    private static final int ROW = 20, WIDTH = 140, HEADER = 20;
 
     private static boolean open = false;
     private static int mx0, my0;
@@ -27,7 +29,14 @@ public class ChatMenu {
         });
     }
 
-    private static int height() { return HEADER + ModuleManager.ALL.size() * ROW + 4; }
+    private static List<Module> visuals() {
+        return ModuleManager.of(Module.Category.VISUAL);
+    }
+
+    /** Wiersze: visuale + "Edit HUD positions". */
+    private static int rows() { return visuals().size() + 1; }
+
+    private static int height() { return HEADER + rows() * ROW + 6; }
 
     private static boolean onClick(Screen screen, double mx, double my, int button) {
         // klikniecia w odtwarzacz (HUD) gdy czat jest otwarty
@@ -37,9 +46,13 @@ public class ChatMenu {
             boolean inside = mx >= mx0 && mx < mx0 + WIDTH && my >= my0 && my < my0 + height();
             if (inside && button == 0) {
                 int idx = (int) ((my - my0 - HEADER) / ROW);
-                if (idx >= 0 && idx < ModuleManager.ALL.size()) {
-                    ModuleManager.ALL.get(idx).toggle();
+                List<Module> vis = visuals();
+                if (idx >= 0 && idx < vis.size()) {
+                    vis.get(idx).toggle();
                     ModuleManager.save();
+                } else if (idx == vis.size()) {
+                    open = false;
+                    MinecraftClient.getInstance().setScreen(new HudEditorScreen(screen));
                 }
                 return false;
             }
@@ -59,20 +72,22 @@ public class ChatMenu {
     private static void render(Screen screen, DrawContext ctx, int mouseX, int mouseY, float tickDelta) {
         if (!open) return;
         var tr = MinecraftClient.getInstance().textRenderer;
-        Gfx.roundRect(ctx, mx0, my0, WIDTH, height(), 6, 0xF0121218);
-        ctx.drawText(tr, "Modules", mx0 + 8, my0 + 5, 0xFFB9B4D6, false);
+        Gfx.roundRect(ctx, mx0, my0, WIDTH, height(), 12, 0xF01C1C1E);
+        ctx.drawText(tr, "Visuals", mx0 + 10, my0 + 7, 0xFF8E8E93, false);
 
-        for (int i = 0; i < ModuleManager.ALL.size(); i++) {
-            Module m = ModuleManager.ALL.get(i);
+        List<Module> vis = visuals();
+        for (int i = 0; i < rows(); i++) {
             int y = my0 + HEADER + i * ROW;
             boolean hover = mouseX >= mx0 && mouseX < mx0 + WIDTH && mouseY >= y && mouseY < y + ROW;
-            if (hover) Gfx.roundRect(ctx, mx0 + 3, y, WIDTH - 6, ROW - 1, 4, 0xFF26233F);
-            ctx.drawText(tr, m.name, mx0 + 8, y + 5, 0xFFFFFFFF, false);
+            if (hover) Gfx.roundRect(ctx, mx0 + 4, y, WIDTH - 8, ROW - 2, 7, 0xFF3A3A3C);
 
-            int sx = mx0 + WIDTH - 28, sy = y + 4;
-            Gfx.roundRect(ctx, sx, sy, 20, 10, 5, m.enabled ? 0xFF7C5CFF : 0xFF3A3850);
-            int kx = m.enabled ? sx + 11 : sx + 1;
-            Gfx.roundRect(ctx, kx, sy + 1, 8, 8, 4, 0xFFFFFFFF);
+            if (i < vis.size()) {
+                Module m = vis.get(i);
+                ctx.drawText(tr, m.name, mx0 + 10, y + 6, 0xFFFFFFFF, false);
+                Gfx.iosSwitch(ctx, mx0 + WIDTH - 40, y + 1, m.enabled ? 1f : 0f);
+            } else {
+                ctx.drawText(tr, "Edit HUD positions", mx0 + 10, y + 6, 0xFF0A84FF, false);
+            }
         }
     }
 }

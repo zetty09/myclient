@@ -3,7 +3,10 @@
   "package": "com.myclient.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "BossBarHudAccessor"
+    "BossBarHudAccessor",
+    "ClientPlayNetworkHandlerMixin",
+    "LivingEntityRendererMixin",
+    "PlayerEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 0

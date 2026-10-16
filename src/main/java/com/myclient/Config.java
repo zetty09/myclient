@@ -14,6 +14,7 @@ public class Config {
     public static class ModState {
         public boolean enabled;
         public int key = -1;
+        public Map<String, Float> settings = new HashMap<>();
     }
 
     public static class Data {
@@ -21,6 +22,8 @@ public class Config {
         /** Tekst w Dynamic Island. Puste = nick z konta. */
         public String islandName = "jape3kk_dev";
         public Map<String, ModState> modules = new HashMap<>();
+        /** Pozycje elementow HUD jako ulamki ekranu {x, y}. */
+        public Map<String, float[]> hud = new HashMap<>();
     }
 
     public static Data data = new Data();
@@ -40,6 +43,7 @@ public class Config {
             if (d.wings == null) d.wings = "NONE";
             if (d.islandName == null) d.islandName = "jape3kk_dev";
             if (d.modules == null) d.modules = new HashMap<>();
+            if (d.hud == null) d.hud = new HashMap<>();
             data = d;
         } catch (Exception ignored) {}
     }

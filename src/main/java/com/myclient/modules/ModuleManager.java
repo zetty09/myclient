@@ -16,19 +16,25 @@ public final class ModuleManager {
     public static final List<Module> ALL = new ArrayList<>();
     private static final Set<Module> HELD = new HashSet<>();
 
-    public static Module ISLAND, MUSIC, SPRINT, FULLBRIGHT;
+    public static Module ISLAND, MUSIC, NAMETAG, SPRINT, FULLBRIGHT;
+    public static InfoModule INFO;
 
     private ModuleManager() {}
 
-    private static Module add(Module m) {
+    private static <T extends Module> T add(T m) {
         ALL.add(m);
         return m;
     }
 
     /** Wywolac po Config.load(). */
     public static void init() {
-        ISLAND = add(new Module("Dynamic Island", "Pill at the top with time, signal and notifications", true) {});
-        MUSIC = add(new Module("Music Player", "Music card on the HUD", false) {});
+        // visuale
+        ISLAND = add(new Module("Dynamic Island", "Pill at the top with time, signal and notifications", true, Module.Category.VISUAL) {});
+        INFO = add(new InfoModule());
+        MUSIC = add(new Module("Music Player", "Music card on the HUD", false, Module.Category.VISUAL) {});
+        NAMETAG = add(new Module("Client Tag", "Your nick with the client logo in third person (F5)", true, Module.Category.VISUAL) {});
+
+        // moduly
         SPRINT = add(new Module("Sprint", "Sprints automatically while moving forward", false) {
             @Override
             public void onTick(MinecraftClient c) {
@@ -59,6 +65,12 @@ public final class ModuleManager {
             Config.ModState st = Config.data.modules.get(m.name);
             if (st != null) {
                 m.key = st.key;
+                if (st.settings != null) {
+                    for (Setting s : m.settings) {
+                        Float v = st.settings.get(s.name);
+                        if (v != null) s.fromFloat(v);
+                    }
+                }
                 if (st.enabled) m.setEnabled(true, false);
             } else if (m.defaultOn) {
                 m.setEnabled(true, false);
@@ -71,9 +83,16 @@ public final class ModuleManager {
             Config.ModState st = new Config.ModState();
             st.enabled = m.enabled;
             st.key = m.key;
+            for (Setting s : m.settings) st.settings.put(s.name, s.toFloat());
             Config.data.modules.put(m.name, st);
         }
         Config.save();
+    }
+
+    public static List<Module> of(Module.Category cat) {
+        List<Module> out = new ArrayList<>();
+        for (Module m : ALL) if (m.category == cat) out.add(m);
+        return out;
     }
 
     /** Co tick: logika modulow + bindy (tylko gdy nie ma otwartego ekranu). */

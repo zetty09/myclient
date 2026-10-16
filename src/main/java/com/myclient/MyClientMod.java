@@ -3,9 +3,12 @@ package com.myclient;
 import com.myclient.cosmetics.WingsFeatureRenderer;
 import com.myclient.modules.ModuleManager;
 import com.myclient.ui.ChatMenu;
+import com.myclient.ui.HudEditorScreen;
 import com.myclient.ui.MainMenuScreen;
 import com.myclient.visuals.DynamicIsland;
+import com.myclient.visuals.HudElements;
 import com.myclient.visuals.MusicPlayer;
+import com.myclient.visuals.TpsTracker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -50,13 +53,19 @@ public class MyClientMod implements ClientModInitializer {
             MinecraftClient c = MinecraftClient.getInstance();
             if (c.options.hudHidden) return;
             if (ModuleManager.ISLAND.enabled) DynamicIsland.render(ctx, c);
-            if (ModuleManager.MUSIC.enabled) MusicPlayer.render(ctx, c);
+            // w edytorze HUD elementy rysuje sam edytor
+            boolean editing = c.currentScreen instanceof HudEditorScreen;
+            if (!editing) {
+                if (HudElements.INFO.enabled()) HudElements.INFO.render(ctx, c);
+                if (ModuleManager.MUSIC.enabled) MusicPlayer.render(ctx, c);
+            }
         });
 
-        // prawy klik w czacie -> lista modulow
+        // prawy klik w czacie -> lista visuali
         ChatMenu.register();
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            TpsTracker.reset();
             var entry = client.getCurrentServerEntry();
             DynamicIsland.push("Connected", entry != null ? entry.address : "Singleplayer", 2500);
         });
