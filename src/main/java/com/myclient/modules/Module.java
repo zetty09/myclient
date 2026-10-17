@@ -41,6 +41,12 @@ public abstract class Module {
         return s;
     }
 
+    protected ModeSetting mode(String name, int def, String... options) {
+        ModeSetting s = new ModeSetting(name, def, options);
+        settings.add(s);
+        return s;
+    }
+
     public void onEnable() {}
     public void onDisable() {}
     public void onTick(MinecraftClient c) {}

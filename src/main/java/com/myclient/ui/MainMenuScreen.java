@@ -9,6 +9,7 @@ import com.myclient.cosmetics.WingType;
 import com.myclient.modules.BoolSetting;
 import com.myclient.modules.Module;
 import com.myclient.modules.ModuleManager;
+import com.myclient.modules.ModeSetting;
 import com.myclient.modules.NumberSetting;
 import com.myclient.modules.Setting;
 import com.myclient.visuals.DynamicIsland;
@@ -426,7 +427,7 @@ public class MainMenuScreen extends Screen {
         for (Setting s : popup.settings) {
             boolean num = s instanceof NumberSetting;
             int h = num ? 32 : 26;
-            out.add(new PRow(num ? 2 : 1, s, y, h));
+            out.add(new PRow(num ? 2 : (s instanceof ModeSetting ? 3 : 1), s, y, h));
             y += h;
         }
         return out;
@@ -466,6 +467,15 @@ public class MainMenuScreen extends Screen {
                     BoolSetting b = (BoolSetting) r.s();
                     text(ctx, b.name, x + 14, r.y() + 9, WHITE);
                     Gfx.iosSwitch(ctx, x + w - 14 - 30, r.y() + 5, approach(b, b.value ? 1f : 0f));
+                }
+                case 3 -> {
+                    ModeSetting ms = (ModeSetting) r.s();
+                    text(ctx, ms.name, x + 14, r.y() + 9, WHITE);
+                    String v = ms.get();
+                    int bw = textRenderer.getWidth(v) + 16;
+                    int bx = x + w - 14 - bw;
+                    Gfx.roundRect(ctx, bx, r.y() + 4, bw, 18, 9, 0xFF3A3A3C);
+                    text(ctx, v, bx + 8, r.y() + 9, BLUE);
                 }
                 default -> {
                     NumberSetting n = (NumberSetting) r.s();
@@ -550,6 +560,9 @@ public class MainMenuScreen extends Screen {
                 } else if (r.kind() == 1) {
                     BoolSetting b = (BoolSetting) r.s();
                     b.value = !b.value;
+                    ModuleManager.save();
+                } else if (r.kind() == 3) {
+                    ((ModeSetting) r.s()).next();
                     ModuleManager.save();
                 } else {
                     dragging = (NumberSetting) r.s();

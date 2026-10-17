@@ -22,6 +22,20 @@ public class Gfx {
         return (al << 24) | (r << 16) | (g << 8) | b;
     }
 
+    /** Linia (dowolny kat) rysowana malymi kwadratami, z uwzglednieniem globalnej przezroczystosci. */
+    public static void line(DrawContext ctx, float x0, float y0, float x1, float y1, int color, int th) {
+        float dx = x1 - x0, dy = y1 - y0;
+        int steps = Math.max(1, (int) Math.ceil(Math.max(Math.abs(dx), Math.abs(dy))));
+        if (steps > 2000) return;
+        int c = a(color);
+        int lo = -(th / 2);
+        for (int i = 0; i <= steps; i++) {
+            int x = Math.round(x0 + dx * i / steps) + lo;
+            int y = Math.round(y0 + dy * i / steps) + lo;
+            ctx.fill(x, y, x + th, y + th, c);
+        }
+    }
+
     /** Tekst z uwzglednieniem globalnej przezroczystosci. */
     public static void text(DrawContext ctx, TextRenderer tr, String s, int x, int y, int color, boolean shadow) {
         int c = a(color);

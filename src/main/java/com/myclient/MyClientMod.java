@@ -50,6 +50,7 @@ public class MyClientMod implements ClientModInitializer {
             }
             ModuleManager.tick(client);
             MusicPlayer.tick(client);
+            com.myclient.visuals.TargetEsp.onTick();
         });
 
         // wizualy na HUD
@@ -57,6 +58,10 @@ public class MyClientMod implements ClientModInitializer {
             MinecraftClient c = MinecraftClient.getInstance();
             if (c.options.hudHidden) return;
             if (ModuleManager.ISLAND.enabled) DynamicIsland.render(ctx, c);
+            if (c.currentScreen == null && c.player != null) {
+                if (ModuleManager.CROSSHAIR.enabled) com.myclient.visuals.CrosshairHud.render(ctx, c);
+                if (ModuleManager.TARGET_ESP.enabled) com.myclient.visuals.TargetEsp.render(ctx, c);
+            }
             // w edytorze HUD elementy rysuje sam edytor
             boolean editing = c.currentScreen instanceof HudEditorScreen;
             if (!editing) {

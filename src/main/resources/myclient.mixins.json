@@ -5,6 +5,7 @@
   "client": [
     "AbstractClientPlayerEntityMixin",
     "BossBarHudAccessor",
+    "InGameHudMixin",
     "ClientPlayNetworkHandlerMixin",
     "LivingEntityRendererMixin",
     "PlayerEntityRendererMixin"

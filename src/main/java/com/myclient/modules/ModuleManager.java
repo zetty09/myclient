@@ -18,6 +18,8 @@ public final class ModuleManager {
 
     public static Module ISLAND, MUSIC, NAMETAG, SPRINT, FULLBRIGHT;
     public static InfoModule INFO;
+    public static TargetEspModule TARGET_ESP;
+    public static CrosshairModule CROSSHAIR;
 
     private ModuleManager() {}
 
@@ -32,6 +34,7 @@ public final class ModuleManager {
         ISLAND = add(new Module("Dynamic Island", "Pill at the top with time, signal and notifications", true, Module.Category.VISUAL) {});
         INFO = add(new InfoModule());
         MUSIC = add(new Module("Music Player", "Music card on the HUD", false, Module.Category.VISUAL) {});
+        CROSSHAIR = add(new CrosshairModule());
         NAMETAG = add(new Module("Client Tag", "Your nick with the client logo in third person (F5)", true, Module.Category.VISUAL) {});
 
         // moduly
@@ -46,6 +49,7 @@ public final class ModuleManager {
                 }
             }
         });
+        TARGET_ESP = add(new TargetEspModule());
         FULLBRIGHT = add(new Module("Fullbright", "Full brightness (client-side night vision)", false) {
             @Override
             public void onTick(MinecraftClient c) {
