@@ -3,6 +3,7 @@
   "package": "com.myclient.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "AbstractClientPlayerEntityMixin",
     "BossBarHudAccessor",
     "ClientPlayNetworkHandlerMixin",
     "LivingEntityRendererMixin",

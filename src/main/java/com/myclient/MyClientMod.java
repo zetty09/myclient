@@ -1,5 +1,7 @@
 package com.myclient;
 
+import com.myclient.cosmetics.FistsFeatureRenderer;
+import com.myclient.cosmetics.HeadbandFeatureRenderer;
 import com.myclient.cosmetics.WingsFeatureRenderer;
 import com.myclient.modules.ModuleManager;
 import com.myclient.ui.ChatMenu;
@@ -36,6 +38,8 @@ public class MyClientMod implements ClientModInitializer {
         LivingEntityFeatureRendererRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
             if (renderer instanceof PlayerEntityRenderer pr) {
                 helper.register(new WingsFeatureRenderer(pr));
+                helper.register(new HeadbandFeatureRenderer(pr));
+                helper.register(new FistsFeatureRenderer(pr));
             }
         });
 
