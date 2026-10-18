@@ -6,6 +6,8 @@
     "AbstractClientPlayerEntityMixin",
     "BossBarHudAccessor",
     "InGameHudMixin",
+    "GameRendererMixin",
+    "MouseMixin",
     "ClientPlayNetworkHandlerMixin",
     "LivingEntityRendererMixin",
     "PlayerEntityRendererMixin"

@@ -20,6 +20,7 @@ public final class ModuleManager {
     public static MusicModule MUSIC;
     public static InfoModule INFO;
     public static TargetEspModule TARGET_ESP;
+    public static ZoomModule ZOOM;
     public static CrosshairModule CROSSHAIR;
 
     private ModuleManager() {}
@@ -50,6 +51,7 @@ public final class ModuleManager {
                 }
             }
         });
+        ZOOM = add(new ZoomModule());
         TARGET_ESP = add(new TargetEspModule());
         FULLBRIGHT = add(new Module("Fullbright", "Full brightness (client-side night vision)", false) {
             @Override
@@ -68,6 +70,7 @@ public final class ModuleManager {
 
         for (Module m : ALL) {
             Config.ModState st = Config.data.modules.get(m.name);
+            if (st == null) m.key = m.defaultKey;
             if (st != null) {
                 m.key = st.key;
                 if (st.settings != null) {
@@ -76,7 +79,7 @@ public final class ModuleManager {
                         if (v != null) s.fromFloat(v);
                     }
                 }
-                if (st.enabled) m.setEnabled(true, false);
+                if (st.enabled && !m.hold) m.setEnabled(true, false);
             } else if (m.defaultOn) {
                 m.setEnabled(true, false);
             }
@@ -107,12 +110,20 @@ public final class ModuleManager {
         }
         if (c.currentScreen != null || c.getWindow() == null) {
             HELD.clear();
+            for (Module m : ALL) if (m.hold && m.enabled) m.setEnabled(false, false);
             return;
         }
         long handle = c.getWindow().getHandle();
         for (Module m : ALL) {
-            if (m.key <= 0) continue;
+            if (m.key <= 0) {
+                if (m.hold && m.enabled) m.setEnabled(false, false);
+                continue;
+            }
             boolean down = InputUtil.isKeyPressed(handle, m.key);
+            if (m.hold) {
+                m.setEnabled(down, false);
+                continue;
+            }
             boolean was = HELD.contains(m);
             if (down && !was) {
                 m.toggle();

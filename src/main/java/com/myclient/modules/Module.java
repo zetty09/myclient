@@ -17,6 +17,10 @@ public abstract class Module {
     public boolean enabled;
     /** Kod klawisza GLFW, -1 = brak bindu. */
     public int key = -1;
+    /** Domyslny klawisz (uzywany, gdy nie ma zapisanej konfiguracji). */
+    public int defaultKey = -1;
+    /** Modul aktywny tylko, gdy trzymasz klawisz (np. Zoom, Freelook). */
+    public boolean hold = false;
 
     protected Module(String name, String description, boolean defaultOn) {
         this(name, description, defaultOn, Category.MODULE);
@@ -51,7 +55,13 @@ public abstract class Module {
     public void onDisable() {}
     public void onTick(MinecraftClient c) {}
 
-    public void toggle() { setEnabled(!enabled, true); }
+    public void toggle() {
+        if (hold) {
+            DynamicIsland.push(name, "Hold your keybind", 1600);
+            return;
+        }
+        setEnabled(!enabled, true);
+    }
 
     public void setEnabled(boolean on, boolean notify) {
         if (on == enabled) return;
