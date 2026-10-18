@@ -9,7 +9,6 @@ import com.myclient.ui.HudEditorScreen;
 import com.myclient.ui.MainMenuScreen;
 import com.myclient.visuals.DynamicIsland;
 import com.myclient.visuals.HudElements;
-import com.myclient.visuals.MusicPlayer;
 import com.myclient.visuals.TpsTracker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -49,7 +48,7 @@ public class MyClientMod implements ClientModInitializer {
                 if (client.currentScreen == null) client.setScreen(new MainMenuScreen());
             }
             ModuleManager.tick(client);
-            MusicPlayer.tick(client);
+            com.myclient.visuals.MediaSession.tick(client, ModuleManager.MUSIC.enabled && ((com.myclient.modules.MusicModule) ModuleManager.MUSIC).notify.value);
             com.myclient.visuals.TargetEsp.onTick();
         });
 
@@ -66,7 +65,7 @@ public class MyClientMod implements ClientModInitializer {
             boolean editing = c.currentScreen instanceof HudEditorScreen;
             if (!editing) {
                 if (HudElements.INFO.enabled()) HudElements.INFO.render(ctx, c);
-                if (ModuleManager.MUSIC.enabled) MusicPlayer.render(ctx, c);
+                if (HudElements.MEDIA.enabled()) HudElements.MEDIA.render(ctx, c);
             }
         });
 

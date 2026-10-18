@@ -2,7 +2,7 @@ package com.myclient.ui;
 
 import com.myclient.modules.Module;
 import com.myclient.modules.ModuleManager;
-import com.myclient.visuals.MusicPlayer;
+import com.myclient.visuals.HudElements;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.MinecraftClient;
@@ -40,7 +40,7 @@ public class ChatMenu {
 
     private static boolean onClick(Screen screen, double mx, double my, int button) {
         // klikniecia w odtwarzacz (HUD) gdy czat jest otwarty
-        if (ModuleManager.MUSIC.enabled && button == 0 && MusicPlayer.click(mx, my, screen.width, screen.height)) return false;
+        if (ModuleManager.MUSIC.enabled && button == 0 && HudElements.MEDIA.click(mx, my)) return false;
 
         if (open) {
             boolean inside = mx >= mx0 && mx < mx0 + WIDTH && my >= my0 && my < my0 + height();

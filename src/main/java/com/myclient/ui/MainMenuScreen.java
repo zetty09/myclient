@@ -35,7 +35,7 @@ public class MainMenuScreen extends Screen {
     private static final int POPW = 244;
     private static final int CARD_H = 36, CARD_STEP = 42;
 
-    private record Tab(String name, String[] icon, int color, String subtitle) {}
+    private record Tab(String name, net.minecraft.util.Identifier icon, int color, String subtitle) {}
 
     private static final Tab[] TABS = {
             new Tab("Modules", Icons.MODULES, 0xFFFF9F0A, "Gameplay features"),
@@ -44,7 +44,7 @@ public class MainMenuScreen extends Screen {
             new Tab("User Interface", Icons.INTERFACE, 0xFF0A84FF, "Move and edit your HUD"),
     };
 
-    private record Sub(String name, String[] icon) {}
+    private record Sub(String name, net.minecraft.util.Identifier icon) {}
 
     private static final Sub[] SUBS = {
             new Sub("Wings", Icons.WINGS),
@@ -197,7 +197,7 @@ public class MainMenuScreen extends Screen {
             if (i != tab) Gfx.roundRect(ctx, px + 8, y, SIDEBAR - 16, 22, 8, Gfx.lerpColor(0x00FFFFFF, 0x1EFFFFFF, hv));
             // ikonka: kolorowy kafelek 16x16 z bialym symbolem 8x8
             Gfx.roundRect(ctx, px + 13, y + 3, 16, 16, 5, t.color());
-            Icons.draw(ctx, t.icon(), px + 17, y + 7, 1, WHITE);
+            Icons.draw(ctx, t.icon(), px + 15, y + 5, 12, WHITE);
             text(ctx, t.name(), px + 36, y + 7, i == tab ? WHITE : 0xFFD1D1D6);
         }
 
@@ -252,7 +252,7 @@ public class MainMenuScreen extends Screen {
         for (int k = 0; k < i; k++) x += subTabW(k) + 6;
         return x;
     }
-    private int subTabW(int i) { return 8 + 8 + 5 + textRenderer.getWidth(SUBS[i].name()) + 10; }
+    private int subTabW(int i) { return 7 + 12 + 5 + textRenderer.getWidth(SUBS[i].name()) + 10; }
     private int subTabY() { return top(); }
     private int subContentY() { return top() + 28; }
 
@@ -291,8 +291,8 @@ public class MainMenuScreen extends Screen {
             boolean sel = sub == i;
             float st = approach("subsel" + i, sel ? 1f : 0f);
             Gfx.roundRect(ctx, x, y, w, 18, 9, Gfx.lerpColor(Gfx.lerpColor(CARD, CARD_HOVER, hv), BLUE, st));
-            Icons.draw(ctx, SUBS[i].icon(), x + 8, y + 5, 1, sel ? WHITE : 0xFFD1D1D6);
-            text(ctx, SUBS[i].name(), x + 8 + 8 + 5, y + 5, sel ? WHITE : 0xFFD1D1D6);
+            Icons.draw(ctx, SUBS[i].icon(), x + 7, y + 3, 12, sel ? WHITE : 0xFFD1D1D6);
+            text(ctx, SUBS[i].name(), x + 7 + 12 + 5, y + 5, sel ? WHITE : 0xFFD1D1D6);
         }
 
         if (sub == 3) {
@@ -333,11 +333,26 @@ public class MainMenuScreen extends Screen {
             if (color == 0) {
                 text(ctx, "-", x + CARD_W / 2 - 2, y + 14, DIM);
             } else if (sub == 1) {
-                Gfx.roundRect(ctx, x + 12, y + 12, 46, 12, 5, color);
-                Gfx.roundRect(ctx, x + 50, y + 22, 6, 10, 3, color);
+                // glowa (skin-owy kafelek) z opaska, wezlem i koncami
+                int hx = x + CARD_W / 2 - 15, hy = y + 6;
+                Gfx.roundRect(ctx, hx, hy, 30, 30, 6, 0xFFE0B48C);
+                Gfx.roundRect(ctx, hx, hy, 30, 9, 4, 0xFF5A3B24);
+                Gfx.roundRect(ctx, hx - 2, hy + 10, 34, 8, 3, Gfx.lerpColor(color, 0xFF000000, 0.25f));
+                Gfx.roundRect(ctx, hx - 2, hy + 10, 34, 5, 3, color);
+                ctx.fill(hx + 6, hy + 21, hx + 8, hy + 23, 0xFF2B1B10);
+                ctx.fill(hx + 22, hy + 21, hx + 24, hy + 23, 0xFF2B1B10);
+                Gfx.roundRect(ctx, hx + 28, hy + 16, 6, 6, 3, Gfx.lerpColor(color, 0xFF000000, 0.2f));
+                Gfx.roundRect(ctx, hx + 29, hy + 21, 4, 11, 2, color);
             } else {
-                Gfx.roundRect(ctx, x + 20, y + 8, 30, 26, 11, color);
-                Gfx.roundRect(ctx, x + 24, y + 30, 22, 8, 3, Gfx.lerpColor(color, 0xFF000000, 0.35f));
+                // rekawica: korpus, kciuk, mankiet i polysk
+                int gx = x + CARD_W / 2 - 15, gy = y + 5;
+                int dark = Gfx.lerpColor(color, 0xFF000000, 0.35f);
+                Gfx.roundRect(ctx, gx, gy + 1, 30, 24, 11, dark);
+                Gfx.roundRect(ctx, gx, gy, 30, 23, 11, color);
+                Gfx.roundRect(ctx, gx - 6, gy + 9, 12, 11, 5, color);
+                Gfx.roundRect(ctx, gx + 3, gy + 22, 24, 10, 3, Gfx.lerpColor(color, 0xFFFFFFFF, 0.55f));
+                Gfx.roundRect(ctx, gx + 3, gy + 28, 24, 4, 2, dark);
+                Gfx.roundRect(ctx, gx + 6, gy + 4, 9, 4, 2, Gfx.lerpColor(color, 0xFFFFFFFF, 0.45f));
             }
         }
         String label = itemLabel(i);

@@ -35,12 +35,21 @@ public class HeadbandFeatureRenderer extends FeatureRenderer<PlayerEntityRenderS
         MatrixStack.Entry e = matrices.peek();
 
         float h = 0.265f, y0 = -0.31f, y1 = -0.19f;
+        int dark = CosmeticDraw.shade(color, 0.72f);
+        int soft = CosmeticDraw.shade(color, 0.88f);
+        float o = h + 0.008f;
         CosmeticDraw.box(e, vc, -h, y0, -h, h, y1, h, color, light);
+        // wypustki (gora i dol) - efekt zszytego brzegu
+        CosmeticDraw.box(e, vc, -o, y0 - 0.004f, -o, o, y0 + 0.016f, o, dark, light);
+        CosmeticDraw.box(e, vc, -o, y1 - 0.016f, -o, o, y1 + 0.004f, o, dark, light);
         // wezel
-        CosmeticDraw.box(e, vc, -0.045f, y0, h, 0.045f, y1 + 0.01f, h + 0.045f, color, light);
-        // dwa konce
-        CosmeticDraw.box(e, vc, -0.105f, y0 + 0.02f, h + 0.02f, -0.045f, y1 + 0.20f, h + 0.045f, color, light);
-        CosmeticDraw.box(e, vc, 0.045f, y0 + 0.02f, h + 0.02f, 0.105f, y1 + 0.22f, h + 0.045f, color, light);
+        CosmeticDraw.box(e, vc, -0.06f, y0 - 0.004f, h, 0.06f, y1 + 0.014f, h + 0.05f, dark, light);
+        CosmeticDraw.box(e, vc, -0.045f, y0, h + 0.002f, 0.045f, y1 + 0.01f, h + 0.058f, color, light);
+        // dwa konce (rozchylone, o roznej dlugosci)
+        CosmeticDraw.box(e, vc, -0.115f, y0 + 0.03f, h + 0.02f, -0.04f, y1 + 0.24f, h + 0.04f, soft, light);
+        CosmeticDraw.box(e, vc, 0.04f, y0 + 0.03f, h + 0.02f, 0.115f, y1 + 0.30f, h + 0.04f, soft, light);
+        CosmeticDraw.box(e, vc, -0.115f, y1 + 0.2f, h + 0.019f, -0.04f, y1 + 0.24f, h + 0.041f, dark, light);
+        CosmeticDraw.box(e, vc, 0.04f, y1 + 0.26f, h + 0.019f, 0.115f, y1 + 0.30f, h + 0.041f, dark, light);
 
         matrices.pop();
     }

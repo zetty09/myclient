@@ -31,16 +31,29 @@ public class FistsFeatureRenderer extends FeatureRenderer<PlayerEntityRenderStat
         int color = type.color();
         PlayerEntityModel model = getContextModel();
 
+        int dark = CosmeticDraw.shade(color, 0.62f);
+        int cuff = CosmeticDraw.shade(color, 1.18f);
+
         // prawa reka: przekroj -3..1 px => -0.1875..0.0625; rekawica dookola z zapasem
         matrices.push();
         model.rightArm.rotate(matrices);
-        CosmeticDraw.box(matrices.peek(), vc, -0.2275f, 0.33f, -0.165f, 0.1025f, 0.67f, 0.165f, color, light);
+        MatrixStack.Entry r = matrices.peek();
+        CosmeticDraw.box(r, vc, -0.2275f, 0.42f, -0.165f, 0.1025f, 0.735f, 0.165f, color, light);       // korpus
+        CosmeticDraw.box(r, vc, -0.2175f, 0.375f, -0.155f, 0.0925f, 0.425f, 0.155f, cuff, light);        // gorny brzeg
+        CosmeticDraw.box(r, vc, -0.215f, 0.31f, -0.152f, 0.09f, 0.38f, 0.152f, dark, light);             // mankiet
+        CosmeticDraw.box(r, vc, 0.085f, 0.46f, -0.13f, 0.145f, 0.60f, 0.03f, color, light);              // kciuk
+        CosmeticDraw.box(r, vc, -0.2175f, 0.69f, -0.158f, 0.0925f, 0.74f, 0.158f, dark, light);          // dol
         matrices.pop();
 
         // lewa reka: przekroj -1..3 px
         matrices.push();
         model.leftArm.rotate(matrices);
-        CosmeticDraw.box(matrices.peek(), vc, -0.1025f, 0.33f, -0.165f, 0.2275f, 0.67f, 0.165f, color, light);
+        MatrixStack.Entry l = matrices.peek();
+        CosmeticDraw.box(l, vc, -0.1025f, 0.42f, -0.165f, 0.2275f, 0.735f, 0.165f, color, light);
+        CosmeticDraw.box(l, vc, -0.0925f, 0.375f, -0.155f, 0.2175f, 0.425f, 0.155f, cuff, light);
+        CosmeticDraw.box(l, vc, -0.09f, 0.31f, -0.152f, 0.215f, 0.38f, 0.152f, dark, light);
+        CosmeticDraw.box(l, vc, -0.145f, 0.46f, -0.13f, -0.085f, 0.60f, 0.03f, color, light);
+        CosmeticDraw.box(l, vc, -0.0925f, 0.69f, -0.158f, 0.2175f, 0.74f, 0.158f, dark, light);
         matrices.pop();
     }
 }

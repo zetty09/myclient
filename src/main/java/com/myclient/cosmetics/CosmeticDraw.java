@@ -12,6 +12,15 @@ public final class CosmeticDraw {
 
     private CosmeticDraw() {}
 
+    /** Przyciemnia kolor ARGB (f < 1) lub rozjasnia (f > 1). */
+    public static int shade(int c, float f) {
+        int a = c >>> 24;
+        int r = Math.min(255, Math.round(((c >> 16) & 255) * f));
+        int g = Math.min(255, Math.round(((c >> 8) & 255) * f));
+        int b = Math.min(255, Math.round((c & 255) * f));
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
     public static void box(MatrixStack.Entry e, VertexConsumer vc,
                            float x0, float y0, float z0, float x1, float y1, float z1,
                            int color, int light) {
