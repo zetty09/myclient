@@ -8,6 +8,8 @@
     "InGameHudMixin",
     "GameRendererMixin",
     "MouseMixin",
+    "EntityMixin",
+    "CameraMixin",
     "ClientPlayNetworkHandlerMixin",
     "LivingEntityRendererMixin",
     "PlayerEntityRendererMixin"

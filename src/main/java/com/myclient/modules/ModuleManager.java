@@ -21,6 +21,10 @@ public final class ModuleManager {
     public static InfoModule INFO;
     public static TargetEspModule TARGET_ESP;
     public static ZoomModule ZOOM;
+    public static FreelookModule FREELOOK;
+    public static KeystrokesModule KEYSTROKES;
+    public static CpsModule CPS;
+    public static ArmorModule ARMOR;
     public static CrosshairModule CROSSHAIR;
 
     private ModuleManager() {}
@@ -37,6 +41,9 @@ public final class ModuleManager {
         INFO = add(new InfoModule());
         MUSIC = add(new MusicModule());
         CROSSHAIR = add(new CrosshairModule());
+        KEYSTROKES = add(new KeystrokesModule());
+        CPS = add(new CpsModule());
+        ARMOR = add(new ArmorModule());
         NAMETAG = add(new Module("Client Tag", "Your nick with the client logo in third person (F5)", true, Module.Category.VISUAL) {});
 
         // moduly
@@ -52,6 +59,7 @@ public final class ModuleManager {
             }
         });
         ZOOM = add(new ZoomModule());
+        FREELOOK = add(new FreelookModule());
         TARGET_ESP = add(new TargetEspModule());
         FULLBRIGHT = add(new Module("Fullbright", "Full brightness (client-side night vision)", false) {
             @Override

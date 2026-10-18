@@ -55,6 +55,7 @@ public class MyClientMod implements ClientModInitializer {
         // wizualy na HUD
         HudRenderCallback.EVENT.register((ctx, tickCounter) -> {
             MinecraftClient c = MinecraftClient.getInstance();
+            com.myclient.visuals.ClickTracker.update(c);
             if (c.options.hudHidden) return;
             if (ModuleManager.ISLAND.enabled) DynamicIsland.render(ctx, c);
             if (c.currentScreen == null && c.player != null) {
@@ -64,8 +65,9 @@ public class MyClientMod implements ClientModInitializer {
             // w edytorze HUD elementy rysuje sam edytor
             boolean editing = c.currentScreen instanceof HudEditorScreen;
             if (!editing) {
-                if (HudElements.INFO.enabled()) HudElements.INFO.render(ctx, c);
-                if (HudElements.MEDIA.enabled()) HudElements.MEDIA.render(ctx, c);
+                for (com.myclient.visuals.HudElement e : HudElements.ALL) {
+                    if (e.enabled()) e.render(ctx, c);
+                }
             }
         });
 
