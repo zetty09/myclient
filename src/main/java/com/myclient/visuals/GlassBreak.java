@@ -2,9 +2,7 @@ package com.myclient.visuals;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import org.joml.Matrix4f;
+import com.myclient.ui.Gfx;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,8 +133,6 @@ public final class GlassBreak {
         float t = System.currentTimeMillis() - startMs;
         float burstE = 1f - (float) Math.pow(1f - Math.min(1f, t / 260f), 3); // rozrzut: szybki start, potem zastyga
 
-        VertexConsumer vc = ctx.getVertexConsumers().getBuffer(RenderLayer.getGui());
-        Matrix4f m = ctx.getMatrices().peek().getPositionMatrix();
         boolean any = false;
 
         // lekki blask w miejscu uderzenia tuz po pekniecieciu
@@ -166,40 +162,39 @@ public final class GlassBreak {
             }
             int rgb = tint & 0xFFFFFF;
             int fill = (Math.round(255 * s.alpha * fade) << 24) | rgb;
-            quad(vc, m, vx, vy, fill);
+            fillPoly(ctx, vx, vy, fill);
 
             int edge = (Math.round(150 * fade) << 24) | 0xFFFFFF;
             for (int v = 0; v < 4; v++) {
                 int n = (v + 1) % 4;
                 if (vx[v] == vx[n] && vy[v] == vy[n]) continue;
-                line(vc, m, vx[v], vy[v], vx[n], vy[n], 0.9f, edge);
+                Gfx.line(ctx, vx[v], vy[v], vx[n], vy[n], edge, 1);
             }
         }
         if (!any) SHARDS.clear();
     }
 
-    /** Wypelniony czworokat; kolejnosc wierzcholkow dopasowana do tej uzywanej przez DrawContext.fill. */
-    private static void quad(VertexConsumer vc, Matrix4f m, float[] x, float[] y, int argb) {
-        float area = 0;
+    /** Wypelnia wypukly czworokat poziomymi paskami (2 px) - tylko zwykle ctx.fill. */
+    private static void fillPoly(DrawContext ctx, float[] x, float[] y, int argb) {
+        if ((argb >>> 24) < 2) return;
+        float minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
         for (int i = 0; i < 4; i++) {
-            int n = (i + 1) % 4;
-            area += x[i] * y[n] - x[n] * y[i];
+            minY = Math.min(minY, y[i]);
+            maxY = Math.max(maxY, y[i]);
         }
-        if (Math.abs(area) < 0.5f) return;
-        if (area < 0) {
-            for (int i = 0; i < 4; i++) vc.vertex(m, x[i], y[i], 0f).color(argb);
-        } else {
-            for (int i = 3; i >= 0; i--) vc.vertex(m, x[i], y[i], 0f).color(argb);
+        for (int row = (int) Math.floor(minY); row < maxY; row += 2) {
+            float yc = row + 1f;
+            float lo = Float.MAX_VALUE, hi = -Float.MAX_VALUE;
+            for (int i = 0; i < 4; i++) {
+                int n = (i + 1) % 4;
+                float y0 = y[i], y1 = y[n];
+                if (y0 == y1) continue;
+                if ((yc < Math.min(y0, y1)) || (yc > Math.max(y0, y1))) continue;
+                float xi = x[i] + (yc - y0) * (x[n] - x[i]) / (y1 - y0);
+                lo = Math.min(lo, xi);
+                hi = Math.max(hi, xi);
+            }
+            if (hi > lo) ctx.fill(Math.round(lo), row, Math.round(hi), row + 2, argb);
         }
-    }
-
-    private static void line(VertexConsumer vc, Matrix4f m, float x0, float y0, float x1, float y1, float width, int argb) {
-        float dx = x1 - x0, dy = y1 - y0;
-        float len = (float) Math.hypot(dx, dy);
-        if (len < 0.5f) return;
-        float nx = -dy / len * width / 2f, ny = dx / len * width / 2f;
-        quad(vc, m,
-                new float[]{x0 - nx, x1 - nx, x1 + nx, x0 + nx},
-                new float[]{y0 - ny, y1 - ny, y1 + ny, y0 + ny}, argb);
     }
 }
