@@ -48,7 +48,7 @@ public class MyClientMod implements ClientModInitializer {
                 if (client.currentScreen == null) client.setScreen(new MainMenuScreen());
             }
             ModuleManager.tick(client);
-            com.myclient.visuals.MediaSession.tick(client, ModuleManager.MUSIC.enabled && ((com.myclient.modules.MusicModule) ModuleManager.MUSIC).notify.value);
+            com.myclient.visuals.MediaSession.tick(client, ModuleManager.MUSIC.enabled && ModuleManager.MUSIC.notify.value);
             com.myclient.visuals.TargetEsp.onTick();
         });
 

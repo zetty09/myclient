@@ -16,7 +16,8 @@ public final class ModuleManager {
     public static final List<Module> ALL = new ArrayList<>();
     private static final Set<Module> HELD = new HashSet<>();
 
-    public static Module ISLAND, MUSIC, NAMETAG, SPRINT, FULLBRIGHT;
+    public static Module ISLAND, NAMETAG, SPRINT, FULLBRIGHT;
+    public static MusicModule MUSIC;
     public static InfoModule INFO;
     public static TargetEspModule TARGET_ESP;
     public static CrosshairModule CROSSHAIR;
