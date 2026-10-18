@@ -75,10 +75,10 @@ public final class TargetEsp {
         Gfx.alpha = fade;
         try {
             switch (m.shape.get()) {
-                case "Box" -> drawBox(ctx, cam, fov, sw, sh, x, y, z, w, h, size, col, th);
+                case "Box" -> drawBox(ctx, cam, fov, sw, sh, x, y, z, w, h, size, time, col, th);
                 case "Diamond" -> drawDiamond(ctx, cam, fov, sw, sh, x, y + h, z, size, time, col, th);
                 case "Arrow" -> drawArrow(ctx, cam, fov, sw, sh, x, y + h, z, size, time, col);
-                default -> drawRing(ctx, cam, fov, sw, sh, x, y, z, w, size, time, col, th);
+                default -> drawRing(ctx, cam, fov, sw, sh, x, y, z, w, h, size, time, col, th);
             }
         } finally {
             Gfx.alpha = 1f;
@@ -103,54 +103,56 @@ public final class TargetEsp {
 
     // ---------- ksztalty ----------
 
+    /** Pierscien "latajacy" gora-dol wzdluz ciala, z pozostawiajacym slad cieniem. */
     private static void drawRing(DrawContext ctx, Camera cam, float fov, int sw, int sh,
-                                 double x, double y, double z, float w, float size, double time, int col, int th) {
-        double r = w * 0.8 * size * (1.0 + 0.05 * Math.sin(time * 3.0));
-        int n = 40;
+                                 double x, double y, double z, float w, float h, float size, double time, int col, int th) {
+        double r = Math.max(0.35, w * 0.75) * size;
+        float baseAlpha = Gfx.alpha;
+        for (int k = 3; k >= 0; k--) {
+            double phase = time * 2.2 - k * 0.22;
+            double yy = y + (0.5 + 0.5 * Math.sin(phase)) * h;
+            Gfx.alpha = baseAlpha * (k == 0 ? 1f : 0.34f / k);
+            ringAt(ctx, cam, fov, sw, sh, x, yy, z, r, col, k == 0 ? th : Math.max(1, th - 1));
+        }
+        Gfx.alpha = baseAlpha;
+    }
+
+    private static void ringAt(DrawContext ctx, Camera cam, float fov, int sw, int sh,
+                               double x, double y, double z, double r, int col, int th) {
+        int n = 36;
         float[] a = new float[2], b = new float[2];
         boolean haveA = false;
-        float[] first = new float[2];
-        boolean haveFirst = false;
         for (int i = 0; i <= n; i++) {
             double ang = i / (double) n * Math.PI * 2.0;
-            boolean ok = project(cam, fov, sw, sh, x + Math.cos(ang) * r, y + 0.03, z + Math.sin(ang) * r, b);
+            boolean ok = project(cam, fov, sw, sh, x + Math.cos(ang) * r, y, z + Math.sin(ang) * r, b);
             if (ok && haveA) Gfx.line(ctx, a[0], a[1], b[0], b[1], col, th);
             if (ok) {
                 a[0] = b[0];
                 a[1] = b[1];
                 haveA = true;
-                if (!haveFirst) { first[0] = b[0]; first[1] = b[1]; haveFirst = true; }
             } else {
                 haveA = false;
             }
         }
     }
 
+    /** Obracajacy sie szescian (szkielet) w srodku modelu przeciwnika. */
     private static void drawBox(DrawContext ctx, Camera cam, float fov, int sw, int sh,
-                                double x, double y, double z, float w, float h, float size, int col, int th) {
-        float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE, maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
-        float[] p = new float[2];
-        double hw = w / 2.0 * size;
+                                double x, double y, double z, float w, float h, float size, double time, int col, int th) {
+        double half = Math.max(0.22, w * 0.45) * size;
+        double cy = y + h / 2.0 + 0.04 * Math.sin(time * 2.5);
+        double rot = time * 1.6;
+        double cs = Math.cos(rot), sn = Math.sin(rot);
+        float[][] p = new float[8][2];
         for (int i = 0; i < 8; i++) {
-            double cx = x + ((i & 1) == 0 ? -hw : hw);
-            double cy = y + ((i & 2) == 0 ? 0 : h * size);
-            double cz = z + ((i & 4) == 0 ? -hw : hw);
-            if (!project(cam, fov, sw, sh, cx, cy, cz, p)) return;
-            minX = Math.min(minX, p[0]);
-            maxX = Math.max(maxX, p[0]);
-            minY = Math.min(minY, p[1]);
-            maxY = Math.max(maxY, p[1]);
+            double lx = (i & 1) == 0 ? -half : half;
+            double ly = (i & 2) == 0 ? -half : half;
+            double lz = (i & 4) == 0 ? -half : half;
+            double rx = lx * cs - lz * sn, rz = lx * sn + lz * cs;
+            if (!project(cam, fov, sw, sh, x + rx, cy + ly, z + rz, p[i])) return;
         }
-        float len = Math.max(6f, Math.min(maxX - minX, maxY - minY) * 0.28f);
-        // naroza w stylu "wizjera"
-        Gfx.line(ctx, minX, minY, minX + len, minY, col, th);
-        Gfx.line(ctx, minX, minY, minX, minY + len, col, th);
-        Gfx.line(ctx, maxX, minY, maxX - len, minY, col, th);
-        Gfx.line(ctx, maxX, minY, maxX, minY + len, col, th);
-        Gfx.line(ctx, minX, maxY, minX + len, maxY, col, th);
-        Gfx.line(ctx, minX, maxY, minX, maxY - len, col, th);
-        Gfx.line(ctx, maxX, maxY, maxX - len, maxY, col, th);
-        Gfx.line(ctx, maxX, maxY, maxX, maxY - len, col, th);
+        int[][] edges = {{0, 1}, {2, 3}, {4, 5}, {6, 7}, {0, 2}, {1, 3}, {4, 6}, {5, 7}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
+        for (int[] e : edges) Gfx.line(ctx, p[e[0]][0], p[e[0]][1], p[e[1]][0], p[e[1]][1], col, th);
     }
 
     private static void drawDiamond(DrawContext ctx, Camera cam, float fov, int sw, int sh,
