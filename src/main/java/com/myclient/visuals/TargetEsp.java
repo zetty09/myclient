@@ -87,7 +87,7 @@ public final class TargetEsp {
 
     // ---------- rzutowanie swiat -> ekran ----------
 
-    private static boolean project(Camera cam, float fov, int sw, int sh, double wx, double wy, double wz, float[] out) {
+    static boolean project(Camera cam, float fov, int sw, int sh, double wx, double wy, double wz, float[] out) {
         Vec3d cp = cam.getPos();
         Vector3f v = new Vector3f((float) (wx - cp.x), (float) (wy - cp.y), (float) (wz - cp.z));
         new Quaternionf(cam.getRotation()).conjugate().transform(v);
@@ -117,7 +117,7 @@ public final class TargetEsp {
         Gfx.alpha = baseAlpha;
     }
 
-    private static void ringAt(DrawContext ctx, Camera cam, float fov, int sw, int sh,
+    static void ringAt(DrawContext ctx, Camera cam, float fov, int sw, int sh,
                                double x, double y, double z, double r, int col, int th) {
         int n = 36;
         float[] a = new float[2], b = new float[2];

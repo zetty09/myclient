@@ -67,6 +67,9 @@ public class MainMenuScreen extends Screen {
     private NumberSetting dragging;
 
     private TextFieldWidget nameField;
+    private TextFieldWidget searchField;
+    private boolean closing;
+    private int lastMx, lastMy;
     private List<String> capeList = List.of();
     private long capeListAt = 0;
 
@@ -83,6 +86,12 @@ public class MainMenuScreen extends Screen {
         nameField.setPlaceholder(Text.literal("Player nickname"));
         nameField.visible = false;
         addDrawableChild(nameField);
+
+        searchField = new TextFieldWidget(textRenderer, cx() + cw() - 130, py + 12, 130, 18, Text.literal("Search"));
+        searchField.setMaxLength(24);
+        searchField.setPlaceholder(Text.literal("Search..."));
+        searchField.setChangedListener(t -> scroll = 0);
+        addDrawableChild(searchField);
     }
 
     // ---------------- uklad ----------------
@@ -94,7 +103,14 @@ public class MainMenuScreen extends Screen {
     private int tabY(int i) { return i < 3 ? py + 58 + i * 24 : py + 150; }
 
     private List<Module> list() {
-        return ModuleManager.of(tab == 0 ? Module.Category.MODULE : Module.Category.VISUAL);
+        List<Module> all = ModuleManager.of(tab == 0 ? Module.Category.MODULE : Module.Category.VISUAL);
+        String q = searchField == null ? "" : searchField.getText().trim().toLowerCase();
+        if (q.isEmpty()) return all;
+        List<Module> out = new ArrayList<>();
+        for (Module m : all) {
+            if (m.name.toLowerCase().contains(q) || m.description.toLowerCase().contains(q)) out.add(m);
+        }
+        return out;
     }
 
     private int cardY(int i) { return top() + i * CARD_STEP - (int) scroll; }
@@ -128,8 +144,22 @@ public class MainMenuScreen extends Screen {
         long now = System.nanoTime();
         dt = Math.min((now - lastNs) / 1_000_000_000f, 0.05f);
         lastNs = now;
-        float k = 1f - (float) Math.exp(-dt * 12f);
-        openT += (1f - openT) * k;
+        lastMx = mouseX;
+        lastMy = mouseY;
+        var ui = ModuleManager.UI;
+        float spd = ui != null && ui.enabled ? ui.speed.value : 1f;
+        float k = 1f - (float) Math.exp(-dt * 12f * spd);
+        if (closing) {
+            openT += (0f - openT) * k * 1.3f;
+            if (openT < 0.04f) {
+                closing = false;
+                openT = 0f;
+                super.close();
+                return;
+            }
+        } else {
+            openT += (1f - openT) * k;
+        }
         contentT += (1f - contentT) * k;
         popupT += ((popup != null ? 1f : 0f) - popupT) * k;
         float targetPill = tabY(tab);
@@ -146,11 +176,29 @@ public class MainMenuScreen extends Screen {
         nameField.setX(cx());
         nameField.setY(subContentY() + 112);
         if (!fieldOn) nameField.setFocused(false);
+        boolean searchOn = tab <= 1 && popup == null && !closing;
+        searchField.visible = searchOn;
+        searchField.setX(cx() + cw() - 130);
+        searchField.setY(py + 12);
+        if (!searchOn) searchField.setFocused(false);
 
         var mat = ctx.getMatrices();
-        float s = 0.94f + 0.06f * openT;
+        String oa = ui != null && ui.enabled ? ui.open.get() : "Pop";
+        String ca = ui != null && ui.enabled ? ui.close.get() : "Instant";
+        float s = switch (oa) {
+            case "Zoom" -> 0.7f + 0.3f * openT;
+            case "Fade", "Slide up", "Drop" -> 1f;
+            default -> 0.94f + 0.06f * openT;
+        };
+        if (closing && ca.equals("Shrink")) s = 0.8f + 0.2f * openT;
+        float ty = switch (oa) {
+            case "Slide up" -> (1f - openT) * 28f;
+            case "Drop" -> -(1f - openT) * 36f;
+            default -> 0f;
+        };
         float ccx = px + PW / 2f, ccy = py + PH / 2f;
         mat.push();
+        mat.translate(0, ty, 0);
         mat.translate(ccx, ccy, 0);
         mat.scale(s, s, 1f);
         mat.translate(-ccx, -ccy, 0);
@@ -557,6 +605,7 @@ public class MainMenuScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
+        if (closing) return true;
         if (popup != null) {
             int x = popX(), y = popY(), w = POPW, h = popH();
             if (mx < x || mx >= x + w || my < y || my >= y + h) {
@@ -729,6 +778,34 @@ public class MainMenuScreen extends Screen {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public void close() {
+        if (closing) return;
+        var ui = ModuleManager.UI;
+        String ca = ui != null && ui.enabled ? ui.close.get() : "Instant";
+        switch (ca) {
+            case "Fade", "Shrink" -> {
+                closing = true;
+                popup = null;
+            }
+            case "Glass break" -> {
+                float ix = lastMx, iy = lastMy;
+                if (ix < px || ix > px + PW || iy < py || iy > py + PH) {
+                    ix = px + PW / 2f;
+                    iy = py + PH / 2f;
+                }
+                int tintColor = ui.tint.get().equals("Clear") ? 0xFFDCEBFF : com.myclient.visuals.Colors.pick(ui.tint.get());
+                com.myclient.visuals.GlassBreak.shatter(px, py, PW, PH, ix, iy, ui.glassTime.value, ui.cracks.index, tintColor);
+                if (ui.sound.value && client != null) {
+                    client.getSoundManager().play(net.minecraft.client.sound.PositionedSoundInstance.master(
+                            net.minecraft.sound.SoundEvents.BLOCK_GLASS_BREAK, 1.0f, 1.0f));
+                }
+                super.close();
+            }
+            default -> super.close();
+        }
     }
 
     @Override

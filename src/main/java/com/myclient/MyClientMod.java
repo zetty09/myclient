@@ -48,6 +48,7 @@ public class MyClientMod implements ClientModInitializer {
                 if (client.currentScreen == null) client.setScreen(new MainMenuScreen());
             }
             ModuleManager.tick(client);
+            com.myclient.visuals.JumpCircles.tick(client);
             com.myclient.visuals.MediaSession.tick(client, ModuleManager.MUSIC.enabled && ModuleManager.MUSIC.notify.value);
             com.myclient.visuals.TargetEsp.onTick();
         });
@@ -61,6 +62,7 @@ public class MyClientMod implements ClientModInitializer {
             if (c.currentScreen == null && c.player != null) {
                 if (ModuleManager.CROSSHAIR.enabled) com.myclient.visuals.CrosshairHud.render(ctx, c);
                 if (ModuleManager.TARGET_ESP.enabled) com.myclient.visuals.TargetEsp.render(ctx, c);
+                com.myclient.visuals.JumpCircles.render(ctx, c);
             }
             // w edytorze HUD elementy rysuje sam edytor
             boolean editing = c.currentScreen instanceof HudEditorScreen;

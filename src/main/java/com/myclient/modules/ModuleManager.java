@@ -25,6 +25,7 @@ public final class ModuleManager {
     public static KeystrokesModule KEYSTROKES;
     public static CpsModule CPS;
     public static ArmorModule ARMOR;
+    public static JumpCirclesModule JUMP_CIRCLES;
     public static CrosshairModule CROSSHAIR;
 
     private ModuleManager() {}
@@ -44,6 +45,7 @@ public final class ModuleManager {
         KEYSTROKES = add(new KeystrokesModule());
         CPS = add(new CpsModule());
         ARMOR = add(new ArmorModule());
+        JUMP_CIRCLES = add(new JumpCirclesModule());
         NAMETAG = add(new Module("Client Tag", "Your nick with the client logo in third person (F5)", true, Module.Category.VISUAL) {});
 
         // moduly
